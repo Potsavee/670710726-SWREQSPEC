@@ -43,3 +43,13 @@
 - ผลลัพธ์: specs/001-booking/plan.md
 - Constraint ที่ AI ยังไม่ได้ใช้: ไม่มี; ทุก Constraint ใน spec ถูกนำไปใช้ใน plan เรียบร้อยแล้ว
 - สิ่งที่ AI บอกว่าอยากเดาแต่ไม่ได้เดา: ความหมายของ “คิวที่ยังไม่ได้ใช้ในวันเดียวกัน” ต้องถามเจ้าหน้าที่เวชระเบียนก่อนสร้าง logic แบบจริง
+
+---
+
+## 2026-09-23 คำสั่ง: /tasks specs/001-booking/spec.md
+
+- เครื่องมือ: Copilot ใน Codespaces
+- ผลลัพธ์: specs/001-booking/tasks.md
+- จำนวน task: 19
+- task ที่รอ Open Question: 1 task คือ T-19 รอ Q-02 เรื่องรูปแบบและวิธีออกหมายเลขคิว
+- ผลการตรวจ: มี task ครบสำหรับ AC-BKG-01 ถึง AC-BKG-06 และ Constraint ทุกข้อใน spec; ยังไม่เริ่มทำ task ใด
