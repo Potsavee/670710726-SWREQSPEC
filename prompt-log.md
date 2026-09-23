@@ -53,3 +53,12 @@
 - จำนวน task: 19
 - task ที่รอ Open Question: 1 task คือ T-19 รอ Q-02 เรื่องรูปแบบและวิธีออกหมายเลขคิว
 - ผลการตรวจ: มี task ครบสำหรับ AC-BKG-01 ถึง AC-BKG-06 และ Constraint ทุกข้อใน spec; ยังไม่เริ่มทำ task ใด
+
+---
+
+## 2026-09-23 คำสั่ง: /implement T-01 specs/001-booking/tasks.md
+
+- ไฟล์ที่สร้าง: `backend/app/db/models.py`, `backend/app/db/session.py`, `backend/app/db/migrations/001_init.py`, `backend/tests/conftest.py`, `backend/tests/test_T01_schema.py`
+- ผล test: `pytest -q tests/test_T01_schema.py` ผ่าน `1 passed`
+- ผลงาน: migration สร้างตาราง `slots`, `bookings` และ `audit_logs`; ตาราง `bookings` เก็บ HN และไม่มี `national_id`
+- สิ่งที่เกือบต้องเดา: ชื่อไฟล์ migration `001_init.py` import แบบปกติไม่ได้ จึงใช้ `importlib` โหลดไฟล์ตาม path ที่ plan ระบุ โดยไม่เปลี่ยนชื่อไฟล์
