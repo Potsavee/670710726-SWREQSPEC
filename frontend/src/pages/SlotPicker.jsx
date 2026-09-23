@@ -9,6 +9,12 @@ function todayAsIsoDate() {
   return new Date().toISOString().slice(0, 10)
 }
 
+function dateAfterDays(days) {
+  const date = new Date()
+  date.setDate(date.getDate() + days)
+  return date.toISOString().slice(0, 10)
+}
+
 function groupSlotsByDate(slots) {
   return slots.reduce((groups, slot) => {
     const dateSlots = groups[slot.slot_date] ?? []
@@ -20,6 +26,7 @@ function groupSlotsByDate(slots) {
 // Displays available slots and reloads them when the package changes (FR-BKG-01, FR-BKG-06).
 export default function SlotPicker({ client }) {
   const [packageCode, setPackageCode] = useState(packages[0].code)
+  const [dateFrom, setDateFrom] = useState(todayAsIsoDate())
   const [slots, setSlots] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -30,7 +37,7 @@ export default function SlotPicker({ client }) {
     setError('')
 
     client
-      .getSlots({ dateFrom: todayAsIsoDate(), packageCode })
+      .getSlots({ dateFrom, packageCode })
       .then((result) => {
         if (active) setSlots(result.slots ?? [])
       })
@@ -44,7 +51,7 @@ export default function SlotPicker({ client }) {
     return () => {
       active = false
     }
-  }, [client, packageCode])
+  }, [client, dateFrom, packageCode])
 
   const slotsByDate = groupSlotsByDate(slots)
 
@@ -55,24 +62,39 @@ export default function SlotPicker({ client }) {
         <h1 id="slot-picker-title" className="mt-2 text-3xl font-bold text-slate-900">
           เลือกแพ็กเกจและช่วงเวลาตรวจ
         </h1>
-        <p className="mt-2 text-slate-600">ช่วงเวลาที่แสดงอยู่ภายใน 30 วันข้างหน้า</p>
+        <p className="mt-2 text-slate-600">เลือกวันได้ภายใน 30 วันข้างหน้า</p>
       </div>
 
-      <label className="block max-w-sm text-sm font-semibold text-slate-700" htmlFor="package-code">
-        แพ็กเกจ
-        <select
-          id="package-code"
-          className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base font-normal text-slate-900 shadow-sm"
-          value={packageCode}
-          onChange={(event) => setPackageCode(event.target.value)}
-        >
-          {packages.map((item) => (
-            <option key={item.code} value={item.code}>
-              {item.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="grid max-w-xl gap-4 sm:grid-cols-2">
+        <label className="block text-sm font-semibold text-slate-700" htmlFor="package-code">
+          แพ็กเกจ
+          <select
+            id="package-code"
+            className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base font-normal text-slate-900 shadow-sm"
+            value={packageCode}
+            onChange={(event) => setPackageCode(event.target.value)}
+          >
+            {packages.map((item) => (
+              <option key={item.code} value={item.code}>
+                {item.label}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        <label className="block text-sm font-semibold text-slate-700" htmlFor="slot-date">
+          วันที่ตรวจ
+          <input
+            id="slot-date"
+            type="date"
+            min={todayAsIsoDate()}
+            max={dateAfterDays(30)}
+            className="mt-2 block w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-base font-normal text-slate-900 shadow-sm"
+            value={dateFrom}
+            onChange={(event) => setDateFrom(event.target.value)}
+          />
+        </label>
+      </div>
 
       {loading && <p role="status">กำลังโหลดช่วงเวลาว่าง...</p>}
       {error && <p role="alert" className="text-red-700">{error}</p>}

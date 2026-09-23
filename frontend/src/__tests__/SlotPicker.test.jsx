@@ -17,7 +17,7 @@ function mockClient() {
   }
 }
 
-test('T-13 แสดงช่วงเวลาว่างและโหลดข้อมูลใหม่เมื่อเปลี่ยนแพ็กเกจ', async () => {
+test('T-13 แสดงช่วงเวลาว่างและโหลดข้อมูลใหม่เมื่อเปลี่ยนแพ็กเกจหรือวัน', async () => {
   const client = mockClient()
   render(<SlotPicker client={client} />)
 
@@ -34,4 +34,12 @@ test('T-13 แสดงช่วงเวลาว่างและโหลด
     dateFrom: expect.any(String),
     packageCode: 'PKG-B',
   })
+
+  fireEvent.change(screen.getByLabelText('วันที่ตรวจ'), { target: { value: '2026-09-30' } })
+
+  await waitFor(() => expect(client.getSlots).toHaveBeenLastCalledWith({
+    dateFrom: '2026-09-30',
+    packageCode: 'PKG-B',
+  }))
+  expect(screen.getByLabelText('วันที่ตรวจ').value).toBe('2026-09-30')
 })
