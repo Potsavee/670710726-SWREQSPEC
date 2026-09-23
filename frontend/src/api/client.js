@@ -18,3 +18,17 @@ export const api = {
     return { status: res.status, body: await res.json() }
   },
 }
+
+// Supplies deterministic slot data while the screen is developed without the backend (FR-BKG-01, FR-BKG-06).
+export function createMockApi() {
+  return {
+    async getSlots({ packageCode }) {
+      const baseSlots = [
+        { id: `${packageCode}-1`, slot_date: '2026-09-24', start_time: '09:00', remaining: 2 },
+        { id: `${packageCode}-2`, slot_date: '2026-09-24', start_time: '13:00', remaining: 0 },
+        { id: `${packageCode}-3`, slot_date: '2026-09-25', start_time: '10:00', remaining: 4 },
+      ]
+      return { slots: baseSlots.map((slot) => ({ ...slot, package_code: packageCode })) }
+    },
+  }
+}

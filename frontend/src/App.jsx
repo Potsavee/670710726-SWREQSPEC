@@ -1,12 +1,12 @@
-// โครงเริ่มต้นของรายวิชา: ยังไม่มีหน้าจอของ task ใด ๆ
-// หน้าจอจริงจะถูกสร้างใน src/pages/ ตาม task ใน tasks.md ทีละหน้า
+import SlotPicker from './pages/SlotPicker.jsx'
+import { createMockApi } from './api/client.js'
+
 export default function App() {
   return (
-    <main className="mx-auto max-w-2xl p-6">
-      <h1 className="text-2xl font-bold text-teal-800">ระบบจองคิวตรวจสุขภาพ</h1>
-      <p className="mt-2 text-slate-600">
-        โครงหน้าจอพร้อมแล้ว หน้าจอของแต่ละ task จะอยู่ในโฟลเดอร์ src/pages/
-      </p>
+    <main className="min-h-screen bg-slate-50 px-6 py-10">
+      <div className="mx-auto max-w-3xl rounded-2xl bg-white p-6 shadow-sm sm:p-10">
+        <SlotPicker client={createMockApi()} />
+      </div>
     </main>
   )
 }
