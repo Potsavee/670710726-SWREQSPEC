@@ -62,3 +62,12 @@
 - ผล test: `pytest -q tests/test_T01_schema.py` ผ่าน `1 passed`
 - ผลงาน: migration สร้างตาราง `slots`, `bookings` และ `audit_logs`; ตาราง `bookings` เก็บ HN และไม่มี `national_id`
 - สิ่งที่เกือบต้องเดา: ชื่อไฟล์ migration `001_init.py` import แบบปกติไม่ได้ จึงใช้ `importlib` โหลดไฟล์ตาม path ที่ plan ระบุ โดยไม่เปลี่ยนชื่อไฟล์
+
+---
+
+## 2026-09-23 คำสั่ง: /implement T-13 specs/001-booking/tasks.md
+
+- ไฟล์ที่สร้างหรือแก้: `frontend/src/pages/SlotPicker.jsx`, `frontend/src/api/client.js`, `frontend/src/App.jsx`, `frontend/src/__tests__/SlotPicker.test.jsx`
+- ผล test: `npm test -- --run src/__tests__/SlotPicker.test.jsx` ผ่าน `1 passed`; `npm test` ผ่าน `2 passed`; `npm run build` สำเร็จ
+- ผลงาน: หน้าจอแสดงช่วงเวลาและที่นั่งคงเหลือจาก mock API และเรียกโหลดข้อมูลใหม่เมื่อเปลี่ยนแพ็กเกจ
+- สิ่งที่เกือบต้องเดา: spec ไม่กำหนดชื่อแพ็กเกจ จึงใช้ `PKG-A` และ `PKG-B` เป็นรหัส fixture เฉพาะ mock/test ไม่ใช่ข้อกำหนดทางธุรกิจ
