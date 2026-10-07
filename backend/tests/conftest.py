@@ -1,34 +1,52 @@
-import importlib.util
-from pathlib import Path
+# เตรียมฐานข้อมูล SQLite ในหน่วยความจำให้ทุก test (ไม่ต้องมี PostgreSQL จริง)
+from datetime import date, time, timedelta
 
 import pytest
-from sqlalchemy import create_engine, inspect
-from sqlalchemy.orm import Session
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import StaticPool
 
+from app.db.models import Base, Slot
+from app.db.session import get_db
+from app.main import app
 
-_migration_path = Path(__file__).parents[1] / "app" / "db" / "migrations" / "001_init.py"
-_migration_spec = importlib.util.spec_from_file_location("booking_initial_migration", _migration_path)
-_migration_module = importlib.util.module_from_spec(_migration_spec)
-assert _migration_spec.loader is not None
-_migration_spec.loader.exec_module(_migration_module)
-upgrade = _migration_module.upgrade
-
-
-@pytest.fixture
-def database_engine():
-    """Creates an in-memory database for migration verification (CON-TECH-01)."""
-    database_engine = create_engine("sqlite:///:memory:")
-    upgrade(database_engine)
-    return database_engine
+# ผู้รับบริการที่ยืนยันตัวตนแล้ว HN 0001234
+AUTH = {"Authorization": "Bearer verified:0001234"}
 
 
 @pytest.fixture
-def database_session(database_engine):
-    """Provides a session against the migrated test database (CON-TECH-01)."""
-    with Session(database_engine) as session:
-        yield session
+def db():
+    engine = create_engine(
+        "sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool
+    )
+    Base.metadata.create_all(engine)
+    session = sessionmaker(bind=engine, autoflush=False)()
+    yield session
+    session.close()
 
 
-def table_columns(database_engine, table_name: str) -> set[str]:
-    """Returns database columns for schema assertions (IF-HIS-01)."""
-    return {column["name"] for column in inspect(database_engine).get_columns(table_name)}
+@pytest.fixture
+def client(db):
+    app.dependency_overrides[get_db] = lambda: db
+    yield TestClient(app)
+    app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def make_slot(db):
+    """สร้างช่วงเวลา 1 ช่วง ค่าเริ่มต้นคือพรุ่งนี้ 09.00 น. แพ็กเกจ BASIC"""
+    def _make(start="09:00", remaining=1, capacity=None, days_from_today=1, package_code="BASIC"):
+        h, m = map(int, start.split(":"))
+        slot = Slot(
+            slot_date=date.today() + timedelta(days=days_from_today),
+            start_time=time(h, m),
+            package_code=package_code,
+            capacity=capacity if capacity is not None else max(remaining, 1),
+            remaining=remaining,
+        )
+        db.add(slot)
+        db.commit()
+        db.refresh(slot)
+        return slot
+    return _make

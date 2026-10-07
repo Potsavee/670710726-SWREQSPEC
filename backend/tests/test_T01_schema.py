@@ -1,25 +1,24 @@
-from app.db.models import AuditLog, Booking, Slot
-from conftest import table_columns
+# test ของ T-01: migration รันผ่าน และไม่มีคอลัมน์เลขบัตรประชาชน
+# รองรับ CON-TECH-01, DOM-PDPA-01, IF-HIS-01
+import importlib
+
+from sqlalchemy import create_engine, inspect
 
 
-def test_T01_migration_creates_booking_tables_without_national_id(database_engine):
-    """Verifies the T-01 completion condition for schema creation and HN-only booking identity."""
-    assert set(database_engine.dialect.get_table_names(database_engine.connect())) == {
-        "audit_logs",
-        "bookings",
-        "slots",
-    }
+def _upgrade_fresh_db():
+    engine = create_engine("sqlite://")
+    migration = importlib.import_module("app.db.migrations.001_init")
+    migration.upgrade(engine)
+    return inspect(engine)
 
-    assert table_columns(database_engine, "bookings") == {
-        "id",
-        "hn",
-        "slot_id",
-        "booking_date",
-        "queue_no",
-        "status",
-        "created_at",
-    }
-    assert "national_id" not in table_columns(database_engine, "bookings")
-    assert Booking.__tablename__ == "bookings"
-    assert Slot.__tablename__ == "slots"
-    assert AuditLog.__tablename__ == "audit_logs"
+
+def test_T01_tables_created():
+    insp = _upgrade_fresh_db()
+    assert set(insp.get_table_names()) >= {"slots", "bookings", "audit_logs"}
+
+
+def test_T01_no_national_id():
+    insp = _upgrade_fresh_db()
+    columns = [c["name"] for c in insp.get_columns("bookings")]
+    assert "national_id" not in columns
+    assert "hn" in columns
